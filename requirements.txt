@@ -1,0 +1,7 @@
+fastapi[all]==0.75.0
+uvicorn[standard]==0.15.0
+SQLAlchemy==1.4.34
+pydantic==1.9.0
+alembic==1.7.7
+databases==0.6.0
+aiosqlite==0.17.0
