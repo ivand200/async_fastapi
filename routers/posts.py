@@ -47,7 +47,7 @@ async def get_post_or_404(id: int, database: Database = Depends(get_database)) -
 
 @router.get("/test", status_code=status.HTTP_200_OK)
 async def test():
-    return "Hello"
+    return {"Hello": "world"}
 
 
 @router.get("/posts", status_code=status.HTTP_200_OK)
