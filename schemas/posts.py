@@ -42,7 +42,7 @@ class PostCreate(PostBase):
         orm_mode = True
 
 
-class PostPublic(BaseModel):
+class PostPublic(PostBase):
     id: int
     comments: Optional[List[CommentPublic]]
 
