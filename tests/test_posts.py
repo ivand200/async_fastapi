@@ -5,7 +5,7 @@ import httpx
 import pytest_asyncio
 
 from fastapi import status
-from schemas.posts import PostCreate
+from schemas.posts import PostCreate, PostPublic
 from models.posts import posts
 from tests.fake_db import database_test
 
@@ -17,15 +17,18 @@ async def initial_posts():
         PostCreate(title="Post 2", content="Content 2"),
         PostCreate(title="Post 3", content="Content 3"),
     ]
+
     for post in initial_posts:
         insert = posts.insert().values(post.dict())
         post = await database_test.execute(insert)
+
+    yield initial_posts
 
     for p in initial_posts:
         delete = posts.delete().where(posts.c.title == p.title)
         await database_test.execute(delete)
 
-    yield initial_posts
+
 
 
 @pytest.mark.asyncio
@@ -58,3 +61,21 @@ class TestCreatePost:
         response_delete = await test_client.delete(f"/posts/{id}")
 
         assert response_delete.status_code == status.HTTP_204_NO_CONTENT
+
+
+@pytest.mark.asyncio
+class TestGetPost:
+    async def test_not_existing(self, test_client: httpx.AsyncClient):
+        response = await test_client.get("/posts/999999")
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    async def test_existing(self, test_client: httpx.AsyncClient):
+        test_post = await test_client.post("/posts", json={"title": "test", "content": "content"})
+        test_post_body = test_post.json()
+        response = await test_client.get(f"/posts/{test_post_body['id']}")
+
+        assert response.status_code == status.HTTP_200_OK
+
+        delete = posts.delete().where(posts.c.id == test_post_body['id'])
+        await database_test.execute(delete)
